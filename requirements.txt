@@ -1,4 +1,4 @@
-python>=3.12
+Python>=3.10
 pip>=23.1.2
 Flask>=1.1.2
 Flask-Compress>=1.8.0
