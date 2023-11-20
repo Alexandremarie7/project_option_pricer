@@ -1,0 +1,234 @@
+#vérifier que les modules datetime, plotly, yfinance & pandas soient installés
+#Si ce n'est pas le cas, voici les commandes : 
+    #pip install datetime
+    #pip install plotly
+    #pip install yfinance
+    #pip install pandas
+
+from datetime import datetime
+import pandas as pd
+import yfinance as yf
+import plotly.io as pio
+import plotly.graph_objs as go
+import plotly.express as px
+pio.renderers.default='browser' #Parametrage du rendu des grphiques dans le navigateur
+
+#Parametrage de la date et des tickers pour les stocks choisis 
+Date_5=f"2017{str(datetime.now().date())[-6:]}" #Définition de la date d'il y a 5 ans,des tickers yfinance
+Ticker_names = ["AAPL", "MSFT", "GOOG", "META"]
+
+
+#Récupération des tickers yfinance 
+Stocks_ID=list()
+for i in range(len(Ticker_names)):
+    Stocks_ID.append(yf.Ticker(Ticker_names[i]))
+
+
+#Récupération des données utiles sur les stocks (Balance Sheet, Income statement, historique du cours et données ESG)
+[Stocks_hist, Stocks_BS, Stocks_IS,Stocks_ESG,Stocks_hist_b100]=[list() for i in range(5)] #Création des listes contenant les futures valeurs
+
+for i in range(len(Stocks_ID)):
+    Stocks_BS.append(Stocks_ID[i].balancesheet) #On ajouste à la liste dédiée les données des stocks
+    Stocks_IS.append(Stocks_ID[i].financials) #On ajouste à la liste dédiée les données des stocks
+    Stocks_hist.append(Stocks_ID[i].history(start=Date_5)) #On ajoute à la liste dédiée le cours de clotûre des stocks
+    Stocks_hist_b100.append(Stocks_ID[i].history(start=Date_5).Close) #On récupère les cours de clotûre pour la base 100
+    try:  #Récupération des données ESG et mise en forme des listes avec gestion du manque de DATA
+        Stocks_ESG.append([Stocks_ID[i].sustainability.loc['environmentScore',:].loc['Value'],
+                          Stocks_ID[i].sustainability.loc['socialScore',:].loc['Value'],
+                          Stocks_ID[i].sustainability.loc['governanceScore',:].loc['Value'],
+                          Stocks_ID[i].sustainability.loc['totalEsg',:].loc['Value']])
+    except : #Dans le cas où la donnée est pas disponible
+        Stocks_ESG.append([0,0,0,0])
+        print(f'Les données ESG pour le Ticker {Ticker_names[i]} ne sont pas disponibles')
+Stocks_ESG=pd.DataFrame([Stocks_ESG[0],Stocks_ESG[1],Stocks_ESG[2],Stocks_ESG[3]], #Mise en forme des données ESG
+                         index=Ticker_names,
+                         columns=['Environment','Social','Governance','Total score'])
+
+
+#Calcul des ratios et des métriques clefs                     
+#Production d'un dataframe comportant le current ratio
+current_r=list()
+for i in range(len(Ticker_names)) :
+    current_r.append(Stocks_BS[i].loc['Total Current Assets'].array/Stocks_BS[i].loc['Total Liab'].array)
+current_r=pd.DataFrame(current_r,
+                       index=Ticker_names,
+                       columns=Stocks_BS[0].columns.year)
+current_r=current_r[current_r.columns[::-1]] #inversion des colonnes pour avoir un ordre chronologique
+print(f'Here are the current ratios :\n {current_r}\n')
+
+#Production d'un dataframe comportant le cash ratio
+cash_r=list()
+for i in range(len(Ticker_names)) :
+    cash_r.append(Stocks_BS[i].loc['Cash'].array/Stocks_BS[i].loc['Total Liab'].array)
+cash_r=pd.DataFrame(cash_r,
+                       index=Ticker_names,
+                       columns=Stocks_BS[0].columns.year)
+cash_r=cash_r[cash_r.columns[::-1]] #inversion des colonnes pour avoir un ordre chronologique
+print(f'Here are the cash ratios :\n {cash_r}\n')
+
+#Production d'un dataframe comportant le debt_to_equity ratio
+debt_to_equi_r=list()
+for i in range(len(Ticker_names)) :
+    debt_to_equi_r.append(Stocks_BS[i].loc['Total Liab'].array/\
+                          Stocks_BS[i].loc['Total Stockholder Equity'].array)
+debt_to_equi_r=pd.DataFrame(debt_to_equi_r,
+                       index=Ticker_names,
+                       columns=Stocks_BS[0].columns.year)
+debt_to_equi_r=debt_to_equi_r[debt_to_equi_r.columns[::-1]] #inversion des colonnes pour avoir un ordre chronologique
+print(f'Here are the debt-to-equity ratios :\n {debt_to_equi_r}\n')
+
+#Production d'un dataframe comportant le gross profit margin ratio
+GPM_r=list()
+for i in range(len(Ticker_names)) :
+    GPM_r.append(Stocks_IS[i].loc['Gross Profit'].array/Stocks_IS[i].loc['Total Revenue'].array)
+GPM_r=pd.DataFrame(GPM_r,
+                       index=Ticker_names,
+                       columns=Stocks_BS[0].columns.year)
+GPM_r=GPM_r[GPM_r.columns[::-1]] #inversion des colonnes pour avoir un ordre chronologique
+print(f'Here are the Gross profit margin ratios :\n {GPM_r}\n')
+
+#Production et affichage des graphiques sur les ratios/scores ESG :
+#Graphique sur le current ratio
+current_r=current_r.T
+current_r=round(current_r,2)
+current_graph=px.bar(current_r,
+                     title='current ratio of the companies by year',
+                     barmode='group',
+                     text='value')
+current_graph.show()
+
+
+#Graphique sur le cash ratio
+cash_r=cash_r.T
+cash_r=round(cash_r,2)
+cash_graph=px.bar(cash_r,
+                  title='Cash ratio of the companies by year',
+                  barmode='group',
+                  text='value')
+cash_graph.show()
+
+
+#Graphique sur le debt-to-equity ratio
+debt_to_equi_r=debt_to_equi_r.T
+debt_to_equi_r=round(debt_to_equi_r,2)
+debt_to_equi_graph=px.bar(debt_to_equi_r,
+                          title='Debt-to-equity ratio of the companies by year',
+                          barmode='group',
+                          text='value')
+debt_to_equi_graph.show()
+
+
+#Graphique sur le gross profit margin ratio
+GPM_r=GPM_r.T
+GPM_r=round(GPM_r,2)
+GPM_graph=px.bar(GPM_r,
+                 title='Gross profit margin ratio of the companies by year',
+                 barmode='group',
+                 text='value')
+GPM_graph.show()
+
+
+#Production d'un graphique comparant les scores ESG des entreprises
+graph_ESG=px.bar(Stocks_ESG,
+                 barmode='group',
+                 title='ESG scores of each stock',
+                 text_auto=True)
+graph_ESG.show()
+
+
+#Production et affichage d'un graphique comparant la variation de valeur annualisée
+Stocks_hist_VA=list() #Création et mise en forme d'une liste contenant le cours de fin d'année
+Stocks_hist_VA_final=list()
+for i in range(len(Ticker_names)):
+    Stocks_hist_VA.append([Stocks_hist[i].loc[Stocks_ID[i].history(start='2017-01-01',
+                                            end='2017-12-31').Close.index.max()].Close,
+                           Stocks_hist[i].loc[Stocks_ID[i].history(start='2018-01-01',
+                                            end='2018-12-31').Close.index.max()].Close,
+                           Stocks_hist[i].loc[Stocks_ID[i].history(start='2019-01-01',
+                                            end='2019-12-31').Close.index.max()].Close,
+                           Stocks_hist[i].loc[Stocks_ID[i].history(start='2020-01-01',
+                                            end='2020-12-31').Close.index.max()].Close,
+                           Stocks_hist[i].loc[Stocks_ID[i].history(start='2021-01-01',
+                                            end='2021-12-31').Close.index.max()].Close,
+                           Stocks_hist[i].loc[Stocks_ID[i].history(start='2022-01-01',
+                                            end='2022-12-31').Close.index.max()].Close])
+    Stocks_hist_VA_final.append([Stocks_hist[i].loc[Stocks_ID[i].history(start='2017-01-01',
+                                            end='2017-12-31').Close.index.max()].Close,
+                           Stocks_hist[i].loc[Stocks_ID[i].history(start='2018-01-01',
+                                            end='2018-12-31').Close.index.max()].Close,
+                           Stocks_hist[i].loc[Stocks_ID[i].history(start='2019-01-01',
+                                            end='2019-12-31').Close.index.max()].Close,
+                           Stocks_hist[i].loc[Stocks_ID[i].history(start='2020-01-01',
+                                            end='2020-12-31').Close.index.max()].Close,
+                           Stocks_hist[i].loc[Stocks_ID[i].history(start='2021-01-01',
+                                            end='2021-12-31').Close.index.max()].Close,
+                           Stocks_hist[i].loc[Stocks_ID[i].history(start='2022-01-01',
+                                            end='2022-12-31').Close.index.max()].Close])
+    
+
+for i in range(len(Ticker_names)): #On calcul le rendement anualisé et on enlève la première valeur
+    for k in range(len(Stocks_hist_VA[i])-1):
+        Stocks_hist_VA_final[i][k+1]=100*(Stocks_hist_VA[i][k+1]-\
+                                    Stocks_hist_VA[i][k])/Stocks_hist_VA[i][k]
+    Stocks_hist_VA_final[i].pop(0)
+
+#Production du graphique comparant les rendements anualisés des actions
+Years=[2018,2019,2020,2021,2022]
+Stocks_VA_graph=go.Figure() #Production d'un graphique comparatif des cours des actions en base 100
+for i in range(len(Ticker_names)) :
+    Stocks_hist_VA[i]=pd.Series(Stocks_hist_VA_final[i],index=Years)
+    Stocks_VA_graph.add_trace(go.Scatter(y=Stocks_hist_VA[i],
+                                         x=Stocks_hist_VA[i].index,
+                                         
+                                         name=Ticker_names[i],
+                                         ))
+Stocks_VA_graph.update_layout(title='Comparison between the anual return of the stocks (in %)',
+                              xaxis_range=[2018,2022])
+Stocks_VA_graph.update_xaxes(title='Year',
+                             )
+Stocks_VA_graph.update_yaxes(title='Rendement en %')
+Stocks_VA_graph.show()
+
+
+#Focus sur la valeur des actions au cours des 5 dernières années
+#Production d'un graphique en bougie par action puis un graphique avec toutes les actions en base 100
+for i in range(len(Ticker_names)): #Fonction servant à produire un graphique en bougie pour un stock donné
+    graph_stocks=go.Figure().add_trace(go.Candlestick(x=Stocks_hist[i].index,
+                                           open=Stocks_hist[i].Open,
+                                           close=Stocks_hist[i].Close,
+                                           high=Stocks_hist[i].High,
+                                           low=Stocks_hist[i].Low,))
+    graph_stocks.update_layout(title=f"History of the value of the stock : {Ticker_names[i]}")
+    graph_stocks.update_yaxes(title='Value indicated in USD')
+    graph_stocks.update_xaxes(rangeslider_visible=True,
+                              rangeselector=dict(buttons=list([
+                               dict(count=6, label="6 mois", step="month", stepmode="backward"),
+                               dict(count=1, label="1 an", step="year", stepmode="backward"),
+                               dict(count=2, label="2 ans", step="year", stepmode="backward"),
+                               dict(step="all")])))
+    graph_stocks.show()
+    
+
+#Création de la base100 :
+for k in range(len(Ticker_names)):
+    for i in range(1,len(Stocks_hist_b100[k])):
+        Stocks_hist_b100[k][i]=(Stocks_hist_b100[k][i]/Stocks_hist_b100[k][0])*100
+    Stocks_hist_b100[k][0]=100
+
+Stocks_b100=go.Figure() #Production d'un graphique comparatif des cours des actions en base 100
+for i in range(len(Ticker_names)) :
+    Stocks_b100.add_trace(go.Scatter(y=Stocks_hist_b100[i],
+                                     x=Stocks_hist_b100[i].index,
+                                     name=Ticker_names[i]))
+    Stocks_b100.update_xaxes(rangeslider_visible=True,
+                             rangeselector=dict(buttons=list([
+                               dict(count=6, label="6 mois", step="month", stepmode="backward"),
+                               dict(count=1, label="1 an", step="year", stepmode="backward"),
+                               dict(count=2, label="2 ans", step="year", stepmode="backward"),
+                               dict(step="all")])))
+Stocks_b100.update_layout(title='Comparison between the values of the stocks with a base 100 index')
+Stocks_b100.show()
+
+
+
+#FIN
