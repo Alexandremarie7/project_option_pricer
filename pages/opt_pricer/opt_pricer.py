@@ -129,7 +129,7 @@ parameters = dbc.Card(
                                     ),   
                                     dbc.Col(
                                         dbc.Input(
-                                            id="rate-selection",
+                                            id="user-rate",
                                             type="number",
                                             #value=0,
                                             placeholder="in %"
@@ -365,7 +365,7 @@ option_prices = dbc.Row([
             r_space,
             dbc.Card(
                 dbc.CardBody([
-                    dbc.Label('Here is the price of the Call option :',
+                    dbc.Label('Price of the Call option :',
                             style = {'font-size': 18}
                     ),
                     space,
@@ -389,7 +389,7 @@ option_prices = dbc.Row([
             ]),
             r_space,
             dbc.Card(dbc.CardBody([
-                dbc.Label('Here is the price of the Put option :',
+                dbc.Label('Price of the Put option :',
                         style = {'font-size': 18}
                 ),
                 space,

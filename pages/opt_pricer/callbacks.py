@@ -53,12 +53,12 @@ def get_callbacks_pricer ():
         State('company-choice', 'value'),
         State('number-period', 'value'),
         State('period-choice', 'value'),
-        State('rate-selection', 'value'),
         State('volatility-selector-type', 'value'),
-        Input('rate-selector-type', 'value'),
+        State('rate-selector-type', 'value'),       
+        State('user-rate', 'value'),
         State('user-volatility', 'value')
     )
-    def put_price_producer(n_clicks : int, company, nb_period, period_type, rate, type_vol, type_rate, vol):
+    def put_price_producer(n_clicks : int, company, nb_period, period_type, type_rate, type_vol, user_rate, user_vol):
 
         if period_type == 'Days' :
             nb_days = nb_period
