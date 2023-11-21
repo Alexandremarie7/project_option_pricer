@@ -6,18 +6,11 @@ import numpy as np
 
 Date_5=f"2017{str(datetime.now().date())[-6:]}"
 
-stocks = pd.read_csv("./data/CAC40_tickers.csv", on_bad_lines="skip", delimiter=";")
+stocks = pd.read_csv("./data/CAC40_tickers_v2.csv", on_bad_lines="skip", delimiter=";")
 
 
 y_tickers = yf.Tickers(list(stocks["Symbol"].values))
 stocks_data = y_tickers.history(start=Date_5)
-
-
-nb_days = 2
-
-test = stocks_data['Close']['ACA.PA'][-nb_days:].pct_change().std()
-
-print(test)
 
 
 

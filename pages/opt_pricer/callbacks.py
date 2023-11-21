@@ -43,22 +43,26 @@ def get_callbacks_pricer ():
         Output('last-price', 'children'),
         Output('nb-days', 'children'),Output('nb-days-v2', 'children'),Output('nb-days-v3', 'children'),Output('nb-days-v4', 'children'),
         Output('variation-last-period', 'children'),
-        Output ('german-rates-adjusted', 'children'),
+        Output('german-rates-adjusted', 'children'),
         Output('hist-vol-past-days', 'children'),
         Output('hist-vol-5-years', 'children'),
         Output('GARCH-vol', 'children'),
         Output('call-price', 'children'),
         Output('put-price', 'children'),
+        Output('graph-call', 'figure'),
+        Output('graph-put', 'figure'),
+
         Input('put-pricer-button', 'n_clicks'),
         State('company-choice', 'value'),
         State('number-period', 'value'),
         State('period-choice', 'value'),
+        State('rate-selector-type', 'value'),   
         State('volatility-selector-type', 'value'),
-        State('rate-selector-type', 'value'),       
         State('user-rate', 'value'),
-        State('user-volatility', 'value')
+        State('user-volatility', 'value'),
+        State('strike-price', 'value')
     )
-    def put_price_producer(n_clicks : int, company, nb_period, period_type, type_rate, type_vol, user_rate, user_vol):
+    def option_price_producer(n_clicks : int, company, nb_period, period_type, type_rate, type_vol, user_rate, user_vol, strike_price):
 
         if period_type == 'Days' :
             nb_days = nb_period
@@ -68,7 +72,7 @@ def get_callbacks_pricer ():
             nb_days = nb_period * 252 #Nb de jours de cotation dans l'année
 
         
-        GARCH_vol = 3 #A modif
+        GARCH_vol = 3 #A modif!!!!!!!!!
 
         temp_stock = stocks['Symbol'].loc[stocks["Nom"].str.contains(company)].iat[0]
 
@@ -86,11 +90,27 @@ def get_callbacks_pricer ():
         graph_vol_predicted = GARCH_model_vol_prediciton_testing(temp_stock,company)
         graph_risk = graph_yield_curve ()
 
-        call_price = 2
-        put_price = 3
+        if type_rate == 1 : #User's rate
+            final_rate = float(user_rate)
+        else : #We take the rate provided by the german bonds
+            final_rate = float(adjusted_rates)
         
+        if type_vol == 1 : #User's vol
+            final_vol = user_vol
+        elif type_vol == 2 : #We take the historical volatility of the same period of time in the past
+            final_vol = hist_vol_past_days
+        elif type_vol == 3 : #We take the historical volatility of the past 5 years, adjusted for our number of days
+            final_vol = hist_vol_5_years
+        else : #We take the volatility predicted by the GARCH model 
+            final_vol = GARCH_vol
 
+        call_price = call (latest_price, strike_price, final_rate/100, final_vol/100, nb_days/252)
 
+        
+        put_price = put (latest_price, strike_price, final_rate, final_vol, nb_days/252)
+
+        graph_call = graph_call_profit (latest_price, strike_price, call_price, company)
+        graph_put = graph_put_profit (latest_price, strike_price, put_price, company)
 
         return [graph_vol_predicted,
                 graph_prix,
@@ -105,8 +125,10 @@ def get_callbacks_pricer ():
                 hist_vol_past_days,
                 hist_vol_5_years,
                 GARCH_vol,
-                call_price,
-                put_price
+                round(call_price, 2),
+                round(put_price,2),
+                graph_call,
+                graph_put
         ]
 
 

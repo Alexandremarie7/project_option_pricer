@@ -8,7 +8,7 @@ logo = html.Img(src=dash.get_asset_url("logo.jpeg"), height="30px")
 navbar = dbc.NavbarSimple(
     children=[
         dbc.NavItem(dbc.NavLink("Option Pricer", href="/opt_pricer")),
-        dbc.NavItem(dbc.NavLink("Call Pricer", href="/c_pricer")),
+        dbc.NavItem(dbc.NavLink("Methodology", href="/methodology")),
         dbc.DropdownMenu(
             children=[
                 dbc.DropdownMenuItem("Our team", href="/our_team"), #Page menant à la présentation de notre équipe
@@ -20,7 +20,7 @@ navbar = dbc.NavbarSimple(
             label="Credits",
         ),
     ],
-    brand=html.A([html.A("Call & Put Pricer Project for this guy :   "),
+    brand=html.A([html.A("European Option Pricer Project for this guy :   "),
                   logo
                   ]),
     brand_href="/",

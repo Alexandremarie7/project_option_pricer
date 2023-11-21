@@ -358,24 +358,25 @@ option_prices = dbc.Row([
         dbc.Card(dbc.CardBody([
             dbc.Row([c_space,
                     dbc.Col(dbc.Card(dbc.CardBody(html.H4("Call Option",
-                                                        className="mt-2 text-center")
+                                                          className="mt-2 text-center")
                     ))),
                     c_space,
             ]),
             r_space,
             dbc.Card(
                 dbc.CardBody([
-                    dbc.Label('Price of the Call option :',
-                            style = {'font-size': 18}
+                    html.Label('Price of the Call option :',
+                            style = {'font-size': 19}
                     ),
                     space,
-                    dbc.Label(id='call-price',
+                    html.Label(id='call-price',
                             style={"font-weight": "bold",
                                     'font-size': 18,
                                     }
                     )
-                ])
-            ) 
+                ])),
+            r_space,
+            dcc.Graph(id='graph-call') 
         ])),
         r_space,
     ]),
@@ -389,16 +390,18 @@ option_prices = dbc.Row([
             ]),
             r_space,
             dbc.Card(dbc.CardBody([
-                dbc.Label('Price of the Put option :',
-                        style = {'font-size': 18}
+                html.Label('Price of the Put option :',
+                        style={"font-size": 19} 
                 ),
                 space,
-                dbc.Label(id='put-price',
-                        style={"font-weight": "bold",
+                html.Label(id='put-price',
+                          style={"font-weight": "bold",
                                 'font-size': 18,
                                 }
                 )
-            ]))
+            ])),
+            r_space,
+            dcc.Graph(id='graph-put') 
         ])),
         r_space,
     ])

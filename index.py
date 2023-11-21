@@ -54,7 +54,7 @@ def routes(pathname):
     elif pathname =="/opt_pricer" :
         return opt_pricer.layout
     elif pathname == "/c_pricer" :
-        return c_pricer.layout
+        return methodology.layout
     else:
         return '404'
 
