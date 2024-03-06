@@ -22,10 +22,8 @@ app = dash.Dash(
     ]
 )
 
-# app.server.config.from_object(Config)  # Inject database configuration into the app
 app.config.suppress_callback_exceptions = True
 
 server = app.server
 server.secret_key = os.environ.get('secret_key', str(randint(0, 1000000)))
 
-# db = SQLAlchemy(server) # Initialize the database connection here

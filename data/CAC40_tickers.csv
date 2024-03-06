@@ -1,29 +1,41 @@
 ﻿Symbol;Nom
-ACA.PA;Crédit Agricole
-ORA.PA;Orange
-CAP.PA;Carrefour
-CA.PA;Capgemini
-ML.PA;Michelin
-MC.PA;Kering
-KER.PA;Atos
-ATO.PA;LVMH
-RI.PA;Pernod Ricard
-VIE.PA;Veolia Environnement
-SGO.PA;Saint-Gobain
-WLN.PA;Worldline
-ENGI.PA;Engie
-BN.PA;Danone
-AIR.PA;Airbus
-GLE.PA;Société Générale
-DG.PA;BNP Paribas
-VIV.PA;Thales
-BNP.PA;Vinci
-SAN.PA;Sanofi
-HO.PA;Vivendi
-OR.PA;L'Oreal
+AI.PA;Air liquide
+AIR.PA;Airbus group
+ALO.PA;Alstom
+MT.AS;Arcelormittal
+CS.PA;Axa
+BNP.PA;Bnp paribas
 EN.PA;Bouygues
-AC.PA;Sodexo
-SW.PA;Accor
-AI.PA;Air Liquide
+CAP.PA;Capgemini
+CA.PA;Carrefour
+ACA.PA;Credit agricole
+BN.PA;Danone
+DSY.PA;Dassault systemes
+EDEN.PA;Edenred
+ENGI.PA;Engie
+EL.PA;EssilorLuxottica
+ERF.PA;Eurofins scientific
+RMS.PA;Hermes
+KER.PA;Kering
 LR.PA;Legrand
-SU.PA;Schneider Electric
+OR.PA;L'Oreal
+MC.PA;LVMH
+ML.PA;Michelin
+ORA.PA;Orange
+RI.PA;Pernod ricard
+PUB.PA;Publicis
+RNO.PA;Renault
+SAF.PA;Safran
+SGO.PA;Saint-gobain
+SAN.PA;Sanofi
+SU.PA;Schneider electric
+GLE.PA;Societe generale
+STLAP.PA;Stellantis
+STMPA.PA;Stmicroelectronics
+TEP.PA;Teleperformance
+HO.PA;Thales
+TTE.PA;Totalenergies
+URW.PA;Unibail-rodamco-westfield
+VIE.PA;Veolia environnement
+DG.PA;Vinci
+WLN.PA;Worldline

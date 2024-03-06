@@ -20,7 +20,7 @@ dash.register_page(
     name="Option Pricer",
 )
 
-#figure=dcc.Graph(id='graph_prix',figure={"data": [{"x": [1, 2, 3], "y": [1, 4, 9]}]})
+get_callbacks_pricer () #To call the callbacks
 
 title = dbc.Row([dbc.Col(""),
                  dbc.Col(
@@ -33,7 +33,7 @@ title = dbc.Row([dbc.Col(""),
                 ])
 
 
-parameters = dbc.Card(
+parameters = dbc.Card( #Parameters window display
     dbc.CardBody(
         [
             html.Div(
@@ -64,13 +64,13 @@ parameters = dbc.Card(
                                         sm=12,
                                     ),
                                     dbc.Col(
-                                         html.Label("Select Risk Free Rate"),
+                                        html.Label("Select Risk Free Rate"),
                                         lg=2,
                                         md=4,
                                         sm=12,
                                     ),
                                     dbc.Col(
-                                         html.Label("Enter stock volatility (OPTIONAL)"),
+                                        html.Label("Enter stock volatility (OPTIONAL)"),
                                         lg=2,
                                         md=4,
                                         sm=12,
@@ -210,17 +210,8 @@ parameters = dbc.Card(
 
 import time
 
-get_callbacks_pricer ()
 
-# Informations = dbc.Card(
-#                 dbc.CardBody(
-                    
-
-
-#                 )
-# )
-
-historical_layout = dbc.Card(dbc.CardBody([
+historical_layout = dbc.Card(dbc.CardBody([ #Stock history window display
                                 dbc.Row([c_space,
                                         dbc.Col(dbc.Card(dbc.CardBody(html.H4("Historical Data",
                                                                     className="mt-2 text-center"
@@ -254,7 +245,7 @@ historical_layout = dbc.Card(dbc.CardBody([
                                 ])
                     ]))
 
-variable_layout = dbc.Row([
+variable_layout = dbc.Row([ #Rate & volaitlty section display
         dbc.Col(
             dbc.Card(dbc.CardBody([
                 dbc.Row([c_space,
@@ -282,7 +273,7 @@ variable_layout = dbc.Row([
                 html.Label('The german bond values are directly sourced via '),
                 space,
                 dcc.Link(html.Label('worldgovernmentbonds.com'),
-                        href='www.worldgovernmentbonds.com'
+                        href='http://www.worldgovernmentbonds.com'
                 ),
                 r_space, r_space,
                 dbc.Row(
@@ -307,44 +298,56 @@ variable_layout = dbc.Row([
                                       )
                             ),
                 dbc.Row([
-                        dbc.Col(dbc.Card(dbc.CardBody([
-                            html.Label('Historical volatility of past'),
-                            space,
-                            html.Label(id='nb-days-v2'),
-                            space,
-                            html.Label('days :'),
-                            space,
-                            html.Label(id='hist-vol-past-days',
-                                       style={"font-weight": "bold"}),
-                            space,
-                            html.Label('%')
+                    dbc.Col(dbc.Card(dbc.CardBody([
+                        html.Label('GARCH vol. of past'),
+                        space,
+                        html.Label(id='nb-days-v2'),
+                        space,
+                        html.Label('days :'),
+                        space,
+                        html.Label(id='garch-vol-past-days',
+                                    style={"font-weight": "bold"}),
+                        space,
+                        html.Label('%')
+                    ]))),
+                    dbc.Col(dbc.Card(dbc.CardBody([
+                        html.Label('Historic vol. of past'),
+                        space,
+                        html.Label(id='nb-days-v3'),
+                        space,
+                        html.Label('days :'),
+                        space,
+                        html.Label(id='hist-vol-past-days',
+                                    style={"font-weight": "bold"}),
+                        space,
+                        html.Label('%')
+                    ]))),
+                    r_space,
+                    dbc.Col(dbc.Card(dbc.CardBody([
+                        html.Label('Adjusted volatility of past'),
+                        space,
+                        html.Label(id='nb-days-v4'),
+                        space,
+                        html.Label('days : (5 years data sample)'),
+                        space,
+                        html.Label(id='hist-vol-5-years',
+                                    style={"font-weight": "bold"}),
+                        space,
+                        html.Label('%')
                         ])))
                     ,
                     r_space,
                     dbc.Col(dbc.Card(dbc.CardBody([
-                            html.Label('Adjusted volatility of past'),
-                            space,
-                            html.Label(id='nb-days-v3'),
-                            space,
-                            html.Label('days : (5 years data sample)'),
-                            space,
-                            html.Label(id='hist-vol-5-years',
-                                       style={"font-weight": "bold"}),
-                            space,
-                            html.Label('%')
-                        ])))
-                    ,
-                    r_space,
-                    dbc.Col(
-                        dbc.Card(dbc.CardBody([
-                            html.Label('GARCH preidcted volatility for next'),
-                            space,
-                            html.Label(id='nb-days-v4'),
-                            space,
-                            html.Label('days :'),
-                            space,
-                            html.Label(id='GARCH-vol',
-                                       style={"font-weight": "bold"})
+                        html.Label('GARCH preidcted volatility for next'),
+                        space,
+                        html.Label(id='nb-days-v5'),
+                        space,
+                        html.Label('days :'),
+                        space,
+                        html.Label(id='GARCH-vol',
+                                   style={"font-weight": "bold"}),
+                        space,
+                        html.Label('%')
                         ]))
                     )
                 ])
@@ -353,7 +356,7 @@ variable_layout = dbc.Row([
         )
     ])
 
-option_prices = dbc.Row([
+option_prices = dbc.Row([ #Call & put section display
     dbc.Col([
         dbc.Card(dbc.CardBody([
             dbc.Row([c_space,
@@ -376,7 +379,9 @@ option_prices = dbc.Row([
                     )
                 ])),
             r_space,
-            dcc.Graph(id='graph-call') 
+            dcc.Loading(dcc.Graph(id='graph-long-call')),
+            r_space,
+            dcc.Loading(dcc.Graph(id='graph-short-call')) 
         ])),
         r_space,
     ]),
@@ -401,13 +406,15 @@ option_prices = dbc.Row([
                 )
             ])),
             r_space,
-            dcc.Graph(id='graph-put') 
+            dcc.Loading(dcc.Graph(id='graph-long-put')),
+            r_space,
+            dcc.Loading(dcc.Graph(id='graph-short-put'))
         ])),
         r_space,
     ])
 ])
 
-layout = html.Div([
+layout = html.Div([ #Gathering of all sections 
             dbc.Container([
                 r_space,
                 dbc.Row(title),
@@ -421,13 +428,3 @@ layout = html.Div([
             r_space,
             option_prices
         ])
-
-    #  pricer_template(stock_ID,"ACA.PA", "ACA.PA", "ACA.PA"), #A tester
-    #  dbc.Row(html.Div(id='price-graph')),
-    #  dbc.Row(html.Div(id="put-price")),
-    #  dbc.Row(html.Div(id='Stock-ID')),
-
-
-
-#dbc.card(dbc.cardbody()) #pour faire un encadré 
-#dbc.container () pour faire un corps centré en rognant sur les cotés

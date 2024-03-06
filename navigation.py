@@ -3,27 +3,14 @@ from dash import Dash, html
 import dash_bootstrap_components as dbc
 from pages import *
 
-logo = html.Img(src=dash.get_asset_url("logo.jpeg"), height="30px")
-
-navbar = dbc.NavbarSimple(
+navbar = dbc.NavbarSimple( #LA bar de navigation présente en haut de page
     children=[
-        dbc.NavItem(dbc.NavLink("Option Pricer", href="/opt_pricer")),
-        dbc.NavItem(dbc.NavLink("Methodology", href="/methodology")),
-        dbc.DropdownMenu(
-            children=[
-                dbc.DropdownMenuItem("Our team", href="/our_team"), #Page menant à la présentation de notre équipe
-                dbc.DropdownMenuItem("The github", href="https://www.lien vers le github"), #A modifier
-                dbc.DropdownMenuItem("Useful ressources", href="/ressources") #Liens ayant permi la réalisation de cet outil
-            ],
-            nav=True,
-            in_navbar=True,
-            label="Credits",
-        ),
+        dbc.NavItem(dbc.NavLink("Option Pricer", href="/opt_pricer")), #Lien menant vers le pricer
+        dbc.NavItem(dbc.NavLink("Methodology", href="/methodology")), #Explicatioon de son fonctionnement
+        dbc.NavItem(dbc.NavLink("Ressources", href="/ressources")), #Liens et ressources ayant permi la réalisation de cet outil
     ],
-    brand=html.A([html.A("European Option Pricer Project for this guy :   "),
-                  logo
-                  ]),
-    brand_href="/",
+    brand=html.A(html.A("European Option Pricer Project")), #Titre de la navbar
+    brand_href="/opt_pricer", #Page par défaut
     color="dark",
     dark=True,
 )

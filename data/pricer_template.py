@@ -1,3 +1,5 @@
+#The file that gather many ressources for graph/values productions 
+
 import dash
 import dash_bootstrap_components as dbc
 from dash import html, dcc
@@ -11,19 +13,8 @@ from data.divers import *
 from arch import arch_model
 from arch.__future__ import reindexing
 
-# def graph_prix_stock (stock, stock_name):
-#     graph_prix = go.Figure(data=[go.Candlestick(x=dates,
-#                                             open=stocks_open[stock],
-#                                             high=stocks_high[stock],
-#                                             low=stocks_low[stock],
-#                                             close=stocks_close[stock])])
-#     graph_prix.update_layout(title=f"Evolution of {stock_name}'s price during the 5 past years")
-#     graph_prix.update_xaxes(title='Year',
-#                              )
-#     graph_prix.update_yaxes(title='Cours')
-#     return graph_prix
 
-def graph_prix_stock (stock, stock_name):
+def graph_prix_stock (stock, stock_name): #Produce the candlestick graph for the layout
     graph_prix = go.Figure(data=go.Candlestick(x=stocks_data.index,
                                             open=stocks_data['Open'][stock],
                                             high=stocks_data['High'][stock],
@@ -40,63 +31,61 @@ def graph_prix_stock (stock, stock_name):
                             )
     return graph_prix
 
-def get_stock_latest_price (stock):
+def get_stock_latest_price (stock): #In the name 
     latest_price = stocks_data['Close'][stock].iat[len(stocks_data['Close'][stock])-1]
     return latest_price
 
-def get_stock_return (stock, nb_days) :
+def get_stock_return (stock, nb_days) : #To obtain return on a giver period of time 
     price_period_before = stocks_data['Close'][stock][-nb_days:-(nb_days)+1].iat[-1]
     latest_price = get_stock_latest_price(stock)
     stock_return = 100*(latest_price-price_period_before)/price_period_before
     return stock_return
 
-def get_stock_daily_return (stock, time_period) :
+def get_stock_daily_return (stock, time_period) : #Used later for volatiltity computation
     daily_return = 100*(stocks_data['Close'][stock][-time_period:].pct_change())
     daily_return.dropna(inplace=True)
     return daily_return
 
-def get_stock_total_return (stock) :
+def get_stock_total_return (stock) : #Useful for the GARCH model later
     total_return = 100*(stocks_data['Close'][stock].pct_change())
     total_return.dropna(inplace=True)
     return total_return
 
-def get_hist_volatility_given_period (stock, time_period) :
+def get_hist_volatility_given_period (stock, time_period) : #To get the historical volatitlity on a given time period for a given stock
     vol = get_stock_daily_return(stock,time_period).std()
     vol = vol*sqrt(time_period)
     return vol
 
-def get_hist_volatility (stock, time_period) :
+def get_hist_volatility (stock, time_period) : #To get the historical volatitlity for a given stock on the whole 5 years available dataset
     vol = get_stock_total_return(stock).std()
     vol = vol*sqrt(time_period)
     return vol
 
-def GARCH_model_results (stock) :
-    garch_model = arch_model(get_stock_total_return(stock),
-                             p = 1,
-                             q = 1,
-                             mean = 'constant',
-                             vol = 'GARCH',
-                             dist = 'normal')
-    garch_result = garch_model.fit(disp='off')
-    return garch_result
-
-def GARCH_model_vol_prediciton_testing (stock, company):
+def GARCH_model_vol_prediciton_testing (stock, company, nb_days): #To test the GARCH model
     rolling_predictions = []
-    test_size = 365
+    test_size = nb_days
     Return = get_stock_total_return(stock)
     for i in range(test_size):
         train = Return[:-(test_size-i)] #Définition du dataset à utiliser (toutes les données - celles à prédire)
-        model = arch_model(train, p=1, q=1) #création du modèles 
+        model = arch_model(train,
+                           p=1,
+                           q=1,
+                           mean = 'constant',
+                           vol = 'GARCH',
+                           dist = 'normal') #création du modèles 
         model_fit = model.fit(disp='off')
         pred = model_fit.forecast(horizon=1) #Prédiction pour le jour à venir 
         rolling_predictions.append(np.sqrt(pred.variance.values[-1,:][0])) #Ajout de la prédiction journalière 
-        
-    rolling_predictions = pd.Series(rolling_predictions, index=Return.index[-365:]) #Mise en forme de la série de prédiction
+    
+
+    annualized_predicted_vol= sqrt((1/test_size)*sum(rolling_predictions)**2)
+
+    rolling_predictions = pd.Series(rolling_predictions, index=Return.index[-nb_days:]) #Mise en forme de la série de prédiction
 
     fig = go.Figure(
         data=go.Scatter(
-            y=Return[-365:],
-            x=Return[-365:].index,
+            y=Return[-nb_days:],
+            x=Return[-nb_days:].index,
             name='True Daily Return'
         )
     )
@@ -111,7 +100,7 @@ def GARCH_model_vol_prediciton_testing (stock, company):
     )
 
     fig.update_layout(
-        title=f"{company}'s Volatility Prediction (GRACH Rolling Forecast over last year)",
+        title=f"{company}'s Volatility Prediction (GARCH Rolling Forecast over last year)",
         title_font_size=16,
         autosize=False,
         height=320,
@@ -133,9 +122,25 @@ def GARCH_model_vol_prediciton_testing (stock, company):
         title='Variance',
     )
 
-    return fig
+    return fig, annualized_predicted_vol
 
-def variation_rendering (number) :
+def GARCH_model_vol_prediciton (stock, nb_days): #To predict the volatility wth GARCH model for the option period
+    Return = get_stock_total_return(stock)
+
+    model = arch_model(Return,
+                       p=1,
+                       q=1,
+                       mean='Zero',
+                       vol = 'GARCH',
+                       dist = 'normal') #création du modèles 
+    model_fit = model.fit(disp='off')
+    pred = model_fit.forecast(horizon=nb_days)#.variance #Prédiction pour le jour à venir 
+    vol_predict = sqrt((sum(pred.variance.values[-1, :])**2)*(1/nb_days))
+
+
+    return vol_predict
+
+def variation_rendering (number) : #Just to have green for positive variation and red for negative one
 
     if number < 0 :
         converted = html.Label(
