@@ -2,7 +2,7 @@
 import flask
 import dash
 import dash_bootstrap_components as dbc
-from dash import html, dcc
+from dash import Dash, html, dcc
 from dash.dependencies import Input, Output
 from server import app, server  # Import server for Gunicorn
 from pages import *
@@ -52,4 +52,4 @@ def routes(pathname):
 
 
 if __name__ == '__main__': 
-    app.run(host='0.0.0.0', port=8066, debug=True, threaded=True)
+    app.run_server(hdebug=True)
