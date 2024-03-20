@@ -11,17 +11,13 @@ from server import app
 
 def get_callbacks_pricer (): #Tous les cllbacks du pricer
     @callback(
-        Output('prediction-graph', 'figure'),
         Output('stock-graph', 'figure'),
         Output('risk-free-graph', 'figure'),
+        Output('risk-free-graph-histo', 'figure'),
         Output('last-price', 'children'),
-        Output('nb-days', 'children'),Output('nb-days-v2', 'children'),Output('nb-days-v3', 'children'),Output('nb-days-v4', 'children'), Output('nb-days-v5', 'children'),
+        Output('nb-days', 'children'),
         Output('variation-last-period', 'children'),
         Output('german-rates-adjusted', 'children'),
-        Output('hist-vol-past-days', 'children'),
-        Output('hist-vol-5-years', 'children'),
-        Output('garch-vol-past-days', 'children'),
-        Output('GARCH-vol', 'children'),
         Output('call-price', 'children'),
         Output('put-price', 'children'),
         Output('graph-long-call', 'figure'),
@@ -60,12 +56,10 @@ def get_callbacks_pricer (): #Tous les cllbacks du pricer
         
 
         graph_prix = graph_prix_stock (temp_stock, company) #Stock prices history
-        graph_vol_predicted = GARCH_model_vol_prediciton_testing(temp_stock,company,nb_days)[0] #Predicted vol by the GARCH model over the last period
-        GRACH_vol_past_days = round(GARCH_model_vol_prediciton_testing(temp_stock,company,nb_days)[1],2) #GARCH predicted vol. for last period value
         graph_risk = graph_yield_curve () #Yield graph (German risk free rates)
+        graph_histo_risk = graph_yield_curve_evolution () #Yield evolution graph
 
-        GARCH_vol = round(GARCH_model_vol_prediciton (temp_stock, nb_days), 2) #Upcoming option period predicted volatility by GARCH model
-
+        
         if type_rate == 1 : #Risk-free rate choice
             final_rate = float(user_rate) #The one provided by the user
         else : 
@@ -77,8 +71,6 @@ def get_callbacks_pricer (): #Tous les cllbacks du pricer
             final_vol = hist_vol_past_days
         elif type_vol == 3 : #We take the historical volatility of the past 5 years, adjusted for our number of days
             final_vol = hist_vol_5_years
-        else : #We take the volatility predicted by the GARCH model 
-            final_vol = GARCH_vol
 
         call_price = call (latest_price, strike_price, final_rate/100, final_vol/100, nb_days/252) #Computation of the call price
 
@@ -90,21 +82,13 @@ def get_callbacks_pricer (): #Tous les cllbacks du pricer
         graph_short_call = graph_short_call_profit (latest_price, strike_price, call_price, company)
         graph_short_put = graph_short_put_profit (latest_price, strike_price, put_price, company)
 
-        return [graph_vol_predicted,
-                graph_prix,
-                graph_risk, 
+        return [graph_prix,
+                graph_risk,
+                graph_histo_risk, 
                 str(round(latest_price,2)) + ' €',
                 nb_days,
-                nb_days,
-                nb_days,
-                nb_days,  
-                nb_days, 
                 var_last_period,
                 adjusted_rates,
-                hist_vol_past_days,
-                hist_vol_5_years,
-                GRACH_vol_past_days,
-                GARCH_vol,
                 round(call_price, 2),
                 round(put_price,2),
                 graph_long_call,

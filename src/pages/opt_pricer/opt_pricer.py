@@ -167,8 +167,7 @@ parameters = dbc.Card( #Parameters window display
                                 options=[
                                     {"label": "User's volatility", "value": 1},
                                     {"label": "Historical volatility (over same period of time as the expiration date)", "value": 2},
-                                    {"label": "Historical volatility (based on the volatility of past 5 years)", "value": 3},
-                                    {"label": "GARCH model predicted volatility", "value": 4}
+                                    {"label": "Historical volatility (based on the volatility of past 5 years)", "value": 3}
                                     ],
                                 value=1,
                                 id="volatility-selector-type"
@@ -245,118 +244,47 @@ historical_layout = dbc.Card(dbc.CardBody([ #Stock history window display
                                 ])
                     ]))
 
-variable_layout = dbc.Row([ #Rate & volaitlty section display
-        dbc.Col(
-            dbc.Card(dbc.CardBody([
-                dbc.Row([c_space,
-                        dbc.Col(dbc.Card(dbc.CardBody(html.H4("Risk-free rate",
-                                                              className="mt-2 text-center"
-                                                      )
-                        ))),
-                        c_space,
-                ]),
-                dcc.Loading(dcc.Graph(id='risk-free-graph',
-                                      style={'height': '47.5vh'}
-                                      )
-                ),
-                r_space,
-                dbc.Card(dbc.CardBody([
-                    html.Label('Here is the risk-free rate adjusted on german bonds'),
-                    space,
-                    html.Label(id='german-rates-adjusted',
-                               style={"font-weight": "bold"}
-                              ),
-                    space,
-                    html.Label('%')
-                ])),
-                r_space, r_space,
-                html.Label('The german bond values are directly sourced via '),
-                space,
-                dcc.Link(html.Label('worldgovernmentbonds.com'),
-                        href='http://www.worldgovernmentbonds.com'
-                ),
-                r_space, r_space,
-                dbc.Row(
-                    html.Label('See the risk-free-rates.py file to see the web scrapping technique',
-                               style={"font-weight": "bold"}
-                    )
-                ),
-                r_space  
-            ]))
-        ),
-        dbc.Col(
-            dbc.Card(dbc.CardBody([
-                dbc.Row([c_space,
-                        dbc.Col(dbc.Card(dbc.CardBody(html.H4("Volatility",
-                                                              className="mt-2 text-center"
-                                                            )
-                        ))),
-                        c_space,
-                ]),
-                dcc.Loading(dcc.Graph(id='prediction-graph',
-                                      style={'height': '47.5vh'}
-                                      )
+variable_layout = dbc.Card(dbc.CardBody([
+                        dbc.Row([c_space,
+                                dbc.Col(dbc.Card(dbc.CardBody(html.H4("Risk-free rate",
+                                                                    className="mt-2 text-center"
+                                )))),
+                                c_space,
+                        ]),
+                        dcc.Loading(dcc.Graph(id='risk-free-graph',
+                                            style={'height': '47.5vh'}
+                        )),
+                        r_space,
+                        dcc.Loading(dcc.Graph(id='risk-free-graph-histo',
+                                            style={'height': '120vh'}
+                        )),
+                        r_space,
+                        dbc.Card(dbc.CardBody([
+                            html.Label('Here is the risk-free rate adjusted on german bonds'),
+                            space,
+                            html.Label(id='german-rates-adjusted',
+                                    style={"font-weight": "bold"}
+                                    ),
+                            space,
+                            html.Label('%')
+                            ])),
+                            r_space, r_space,
+                            html.Label('The german bond values are directly sourced via '),
+                            space,
+                            dcc.Link(html.Label('worldgovernmentbonds.com'),
+                                    href='http://www.worldgovernmentbonds.com'
                             ),
-                dbc.Row([
-                    dbc.Col(dbc.Card(dbc.CardBody([
-                        html.Label('GARCH vol. of past'),
-                        space,
-                        html.Label(id='nb-days-v2'),
-                        space,
-                        html.Label('days :'),
-                        space,
-                        html.Label(id='garch-vol-past-days',
-                                    style={"font-weight": "bold"}),
-                        space,
-                        html.Label('%')
-                    ]))),
-                    dbc.Col(dbc.Card(dbc.CardBody([
-                        html.Label('Historic vol. of past'),
-                        space,
-                        html.Label(id='nb-days-v3'),
-                        space,
-                        html.Label('days :'),
-                        space,
-                        html.Label(id='hist-vol-past-days',
-                                    style={"font-weight": "bold"}),
-                        space,
-                        html.Label('%')
-                    ]))),
-                    r_space,
-                    dbc.Col(dbc.Card(dbc.CardBody([
-                        html.Label('Adjusted volatility of past'),
-                        space,
-                        html.Label(id='nb-days-v4'),
-                        space,
-                        html.Label('days : (5 years data sample)'),
-                        space,
-                        html.Label(id='hist-vol-5-years',
-                                    style={"font-weight": "bold"}),
-                        space,
-                        html.Label('%')
-                        ])))
-                    ,
-                    r_space,
-                    dbc.Col(dbc.Card(dbc.CardBody([
-                        html.Label('GARCH preidcted volatility for next'),
-                        space,
-                        html.Label(id='nb-days-v5'),
-                        space,
-                        html.Label('days :'),
-                        space,
-                        html.Label(id='GARCH-vol',
-                                   style={"font-weight": "bold"}),
-                        space,
-                        html.Label('%')
+                            r_space, r_space,
+                            dbc.Row(
+                                html.Label('See the risk-free-rates.py file to see the web scrapping technique',
+                                        style={"font-weight": "bold"}
+                                )
+                            ),
+                            r_space  
                         ]))
-                    )
-                ])
+        
 
-            ]))
-        )
-    ])
-
-option_prices = dbc.Row([ #Call & put section display
+option_prices = dbc.Row([#Call & put section display
     dbc.Col([
         dbc.Card(dbc.CardBody([
             dbc.Row([c_space,
@@ -421,10 +349,10 @@ layout = html.Div([ #Gathering of all sections
                 r_space,
                 dbc.Row(parameters),
                 r_space,
-                dbc.Row(historical_layout)
+                dbc.Row(historical_layout),
+                r_space,
+                dbc.Row(variable_layout),
             ]),
-            r_space,
-            variable_layout,
             r_space,
             option_prices
         ])

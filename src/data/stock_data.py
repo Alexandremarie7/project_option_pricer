@@ -7,7 +7,7 @@ import numpy as np
 
 Date_5=f"2017{str(datetime.now().date())[-6:]}"
 
-stocks = pd.read_csv("./data/CAC40_tickers.csv", on_bad_lines="skip", delimiter=";")
+stocks = pd.read_csv("./src/data/CAC40_tickers.csv", on_bad_lines="skip", delimiter=";")
 
 
 y_tickers = yf.Tickers(list(stocks["Symbol"].values))

@@ -3,6 +3,7 @@
 from bs4 import BeautifulSoup as bs
 import requests
 import plotly.graph_objects as go
+import pandas as pd
 
 maturities = ['1-month', #Wanted maturties
               '3-months',
@@ -14,6 +15,12 @@ maturities = ['1-month', #Wanted maturties
               '4-years',
               '5-years'
               ]
+
+rates_dates=['Today', #Wanted history to plot the 3D graph
+             'Dec-23',
+             'Dec-22',
+             'Dec-21',
+             'Dec-20']
 
 def get_rates () :  #TO scrap the website
     rates = [] #Rates that will be added one by one
@@ -28,6 +35,24 @@ def get_rates () :  #TO scrap the website
     return rates
 
 rates = get_rates () #Store the rates in a variable to use it for the graph
+
+empt=pd.DataFrame(0,maturities,rates_dates[1:])
+rates_v2=pd.DataFrame(rates,maturities).astype(float)
+rates_hist=pd.concat([rates_v2,empt],axis=1)
+
+def get_rates_hist () :
+    for x in maturities :
+        url = 'http://www.worldgovernmentbonds.com/bond-historical-data/germany/' + x #Add the wanted maturity to the URL
+        soup = bs(requests.get(url).text, 'html')
+        count_x=1
+        for i in soup.find_all(class_="w3-center bd-gray-100")[1:5]:
+            y=rates_dates[count_x]
+            rates_hist.at[x,y]=float(i.text[:-2])
+            count_x+=1
+
+    return rates_hist
+
+rates_hist = get_rates_hist()
 
 def graph_yield_curve () : #Produce the yield curve graph for the german risk free rates
     fig = go.Figure()
@@ -46,6 +71,23 @@ def graph_yield_curve () : #Produce the yield curve graph for the german risk fr
                       xaxis_title='Maturity',
                       yaxis_title='Yield Rate',
                       )
+
+    return fig
+
+def graph_yield_curve_evolution () :
+    fig=go.Figure()
+    
+    fig.add_trace(go.Surface(
+                z=rates_hist.values,
+                x=rates_dates,
+                y=maturities
+                ))
+    
+    fig.update_layout(title='German Yield Curve evolution',
+                    autotypenumbers='convert types',
+                    xaxis_title='Date',
+                    yaxis_title='Maturity'
+                    )
 
     return fig
 

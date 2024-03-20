@@ -11,6 +11,10 @@ import navigation
 
 #Ceci est le fichier central, celui d'où est exécuté l'app
 
+app=Dash(__name__,title="European Option Pricer")
+
+server=app.server
+
 app.title = "European Option Pricer"
 
 url_bar_navbar_content = html.Div([
@@ -48,4 +52,4 @@ def routes(pathname):
 
 
 if __name__ == '__main__': 
-    app.run_server(host='0.0.0.0', port=8065, debug=False, threaded=True)
+    app.run(host='0.0.0.0', port=8066, debug=True, threaded=True)
